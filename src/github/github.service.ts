@@ -1,26 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { CreateGithubDto } from './dto/create-github.dto';
-import { UpdateGithubDto } from './dto/update-github.dto';
+import { Octokit } from 'octokit';
+// import { CreateGithubDto } from './dto/create-github.dto';
+// import { UpdateGithubDto } from './dto/update-github.dto';
 
 @Injectable()
 export class GithubService {
-  create(createGithubDto: CreateGithubDto) {
-    return 'This action adds a new github';
+  octokit: any;
+  constructor() {
+    this.octokit = new Octokit({
+      auth: process.env.GITHUB_SYNC_TOKEN, // 使用你的GitHub个人访问令牌
+    });
   }
 
-  findAll() {
-    return `This action returns all github`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} github`;
-  }
-
-  update(id: number, updateGithubDto: UpdateGithubDto) {
-    return `This action updates a #${id} github`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} github`;
+  async getDayDayUpIssues() {
+    const data = await this.octokit.request(
+      'GET /repos/{owner}/{repo}/issues',
+      {
+        owner: 'mortal-cultivation-biography',
+        repo: 'daydayup',
+      },
+    );
+    return data;
   }
 }

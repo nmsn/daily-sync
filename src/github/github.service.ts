@@ -13,13 +13,31 @@ export class GithubService {
   }
 
   async getDayDayUpIssues() {
-    const data = await this.octokit.request(
-      'GET /repos/{owner}/{repo}/issues',
-      {
-        owner: 'mortal-cultivation-biography',
-        repo: 'daydayup',
-      },
-    );
-    return data;
+    const res = await this.octokit.request('GET /repos/{owner}/{repo}/issues', {
+      owner: 'mortal-cultivation-biography',
+      repo: 'daydayup',
+    });
+    const { data = [] } = res;
+    const result = data?.map((item) => {
+      const { url, labels, id, title, updated_at } = item;
+      const _labels = labels.map((label) => {
+        const { id, name, color } = label;
+        return {
+          id,
+          name,
+          color,
+        };
+      });
+
+      return {
+        url,
+        id,
+        title,
+        updated_at,
+        // 这个是否要单独存储
+        labels: _labels,
+      };
+    });
+    return result;
   }
 }

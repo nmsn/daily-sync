@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+// import { Cron, CronExpression } from '@nestjs/schedule';
 import { Octokit } from 'octokit';
 // import { CreateGithubDto } from './dto/create-github.dto';
 // import { UpdateGithubDto } from './dto/update-github.dto';
@@ -6,11 +7,18 @@ import { Octokit } from 'octokit';
 @Injectable()
 export class GithubService {
   octokit: any;
+  private readonly logger = new Logger(GithubService.name);
   constructor() {
     this.octokit = new Octokit({
       auth: process.env.GITHUB_SYNC_TOKEN, // 使用你的GitHub个人访问令牌
     });
   }
+
+  // @Cron(CronExpression.EVERY_10_SECONDS)
+  // day() {
+  //   console.log(123);
+  //   this.logger.debug('Called every 30 seconds');
+  // }
 
   async getDayDayUpIssues() {
     const res = await this.octokit.request('GET /repos/{owner}/{repo}/issues', {

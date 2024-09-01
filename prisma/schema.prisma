@@ -1,0 +1,32 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model DayDayUp {
+  id        Int    @id @default(autoincrement())
+  githubIssueId Int @default(0)
+  updateTime DateTime
+  title    String @db.VarChar(255)
+  url   String @db.VarChar(255)
+}
+
+model Awesome {
+  id        Int    @id @default(autoincrement())
+  githubIssueId Int @default(0)
+  updateTime DateTime
+  title    String @db.VarChar(255)
+  url   String @db.VarChar(255)
+}
+
+// 更新命令 pmpm dlx prisma migrate dev

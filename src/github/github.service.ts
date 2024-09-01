@@ -1,8 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-// import { Cron, CronExpression } from '@nestjs/schedule';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Octokit } from 'octokit';
-// import { CreateGithubDto } from './dto/create-github.dto';
-// import { UpdateGithubDto } from './dto/update-github.dto';
+// import { Prisma } from '@prisma/client';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class GithubService {
@@ -13,39 +12,77 @@ export class GithubService {
       auth: process.env.GITHUB_SYNC_TOKEN, // 使用你的GitHub个人访问令牌
     });
   }
+  @Inject(PrismaService)
+  private prisma: PrismaService;
 
+  // 定时任务
   // @Cron(CronExpression.EVERY_10_SECONDS)
   // day() {
-  //   console.log(123);
   //   this.logger.debug('Called every 30 seconds');
   // }
 
-  async getDayDayUpIssues() {
+  // 需要记录一下时间
+  async syncDayDayUpIssues() {
     const res = await this.octokit.request('GET /repos/{owner}/{repo}/issues', {
       owner: 'mortal-cultivation-biography',
       repo: 'daydayup',
     });
     const { data = [] } = res;
     const result = data?.map((item) => {
-      const { url, labels, id, title, updated_at } = item;
-      const _labels = labels.map((label) => {
-        const { id, name, color } = label;
-        return {
-          id,
-          name,
-          color,
-        };
-      });
+      const { url, id, title, updated_at } = item;
 
       return {
         url,
-        id,
+        githubIssueId: id,
         title,
-        updated_at,
-        // 这个是否要单独存储
-        labels: _labels,
+        updateTime: updated_at,
       };
     });
-    return result;
+    const oldData = await this.getDayDayUp();
+    const newData = result.filter(
+      (item) =>
+        !oldData.some(
+          (oldItem) => oldItem.githubIssueId === item.githubIssueId,
+        ),
+    );
+    await this.prisma.dayDayUp.createMany({
+      data: newData,
+    });
+  }
+
+  async syncAwesomeIssues() {
+    const res = await this.octokit.request('GET /repos/{owner}/{repo}/issues', {
+      owner: 'mortal-cultivation-biography',
+      repo: 'awesome',
+    });
+    const { data = [] } = res;
+    const result = data?.map((item) => {
+      const { url, id, title, updated_at } = item;
+
+      return {
+        url,
+        githubIssueId: id,
+        title,
+        updateTime: updated_at,
+      };
+    });
+    const oldData = await this.getDayDayUp();
+    const newData = result.filter(
+      (item) =>
+        !oldData.some(
+          (oldItem) => oldItem.githubIssueId === item.githubIssueId,
+        ),
+    );
+    await this.prisma.dayDayUp.createMany({
+      data: newData,
+    });
+  }
+
+  async getDayDayUp() {
+    return await this.prisma.dayDayUp.findMany();
+  }
+
+  async getAwesome() {
+    return await this.prisma.awesome.findMany();
   }
 }

@@ -1,19 +1,28 @@
 import { Controller, Get } from '@nestjs/common';
 import { GithubService } from './github.service';
-// import { CreateGithubDto } from './dto/create-github.dto';
-// import { UpdateGithubDto } from './dto/update-github.dto';
 @Controller('github')
 export class GithubController {
   octokit: any;
   constructor(private readonly githubService: GithubService) {}
 
-  @Get('/daydayup')
-  findAll() {
-    return this.githubService.getDayDayUpIssues();
+  @Get('dayDayUp')
+  async getDayDayUp() {
+    return await this.githubService.getDayDayUp();
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.githubService.findAll();
-  // }
+  // put dayDayUp
+  @Get('syncDayDayUp')
+  async syncDayDayUp() {
+    return await this.githubService.syncDayDayUpIssues();
+  }
+
+  @Get('awesome')
+  async getAwesome() {
+    return await this.githubService.getAwesome();
+  }
+
+  @Get('awesome')
+  async syncAwesome() {
+    return await this.githubService.syncAwesomeIssues();
+  }
 }
